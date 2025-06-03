@@ -1,17 +1,13 @@
 #include "LSFR.h"
-
+#include "initialisation.h"
 #include <stdio.h>
+
+#include "initialisation.h"
 
 uint32_t state = 0;
 uint32_t lfsr_seed = 0;
-uint32_t saved_state = 0;  // ✅ Declare global saved state
+uint32_t saved_state = 0;
 
-void init_LSFR(void)
-{
-    lfsr_seed = 0x11079355; 
-    state = lfsr_seed;
-    saved_state = state;  // Optionally save initial state if you want
-}
 
 void next_LSFR(void)
 {

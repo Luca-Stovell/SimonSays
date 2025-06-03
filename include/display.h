@@ -2,6 +2,7 @@
 #define DISPLAY_H
 
 #include <stdint.h>
+#include "initialisation.h"
 
 
 void display_init(void);

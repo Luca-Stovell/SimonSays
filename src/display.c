@@ -1,6 +1,6 @@
 #include <avr/io.h>
 #include "display_macros.h"
-
+#include "initialisation.h"
 #include <avr/interrupt.h>
 
 volatile uint8_t digit_l = DISP_OFF;

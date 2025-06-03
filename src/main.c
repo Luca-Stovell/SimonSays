@@ -30,7 +30,7 @@ GameState current_state = SIMON_GENERATE;
 uint8_t current_button = 0;
 uint16_t sequence[32];
 uint16_t elapsed_time;
-uint16_t sequence_length = 130;
+uint16_t sequence_length = 1;
 uint16_t sequence_index = 0;
 uint16_t playback_delay = 500;
 

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-void buzzer_init(void);
+
 void play_tone(uint8_t button);  // <-- Add this
 void stop_tone(void);
 

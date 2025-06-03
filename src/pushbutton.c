@@ -17,12 +17,3 @@ void pb_debounce(void) {
 
     pb_debounced_state ^= (vcount0 & vcount1);
 }
-
-void buttons_init(void)
-{
-    // Enable pull-up resistors for PBs (no interrupts required)
-    PORTA.PIN4CTRL = PORT_PULLUPEN_bm;  // S1
-    PORTA.PIN5CTRL = PORT_PULLUPEN_bm;  // S2
-    PORTA.PIN6CTRL = PORT_PULLUPEN_bm;  // S3
-    PORTA.PIN7CTRL = PORT_PULLUPEN_bm;  // S4
-}

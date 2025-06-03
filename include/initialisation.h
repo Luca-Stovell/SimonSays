@@ -1,17 +1,20 @@
 #ifndef INITIALISATION_H
 #define INITIALISATION_H
 
-typedef enum {
-    NO_BUTTON_PRESSED = -1,
-    BUTTON_1 = 0,
-    BUTTON_2 = 1,
-    BUTTON_3 = 2,
-    BUTTON_4 = 3
-} Button;
+extern uint32_t state;
+extern uint32_t lfsr_seed ;
+extern uint32_t saved_state;
 
+void buzzer_init(void);
 
 void buttons_init(void);
 
-void led_init(void);
+void init_LSFR(void);       // Initialize LFSR with student number seed
+
+void timer_init(void);
+
+void uart_init(void);
+
+void adc_init();
 
 #endif
