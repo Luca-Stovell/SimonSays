@@ -9,7 +9,7 @@ void buzzer_init(void);
 
 void buttons_init(void);
 
-void init_LSFR(void);       // Initialize LFSR with student number seed
+void init_LSFR(void);
 
 void timer_init(void);
 
