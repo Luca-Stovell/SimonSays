@@ -2,13 +2,14 @@
 
 #include "initialisation.h"
 
+
+
 void buzzer_init(void) {
 
     // TCA0 will control the buzzer (PB0), so we need to enable it as an output
     PORTB.OUTCLR = PIN0_bm; // buzzer off initially
     PORTB.DIRSET = PIN0_bm; // Enable PB0 as output
 
-     
 
     // Single-slope PWM mode, WO2 enable (PB5, LED DISP DP)    
     TCA0.SINGLE.CTRLB = TCA_SINGLE_WGMODE_SINGLESLOPE_gc | TCA_SINGLE_CMP0EN_bm;
@@ -76,13 +77,15 @@ void adc_init(){
 
     ADC0.COMMAND = ADC_MODE_SINGLE_8BIT_gc | ADC_START_IMMEDIATE_gc;
 }
-
-void uart_init(void)
+void uart_init()
 {
-    // 9600 baud
-    USART0.BAUD = 1389;
+    PORTB.DIRSET = PIN2_bm; // enable PB2 as an output (UART TX)
 
-    // Enable receive complete interrupt
-    USART0.CTRLA = USART_RXCIE_bm;
-    USART0.CTRLB = USART_RXEN_bm | USART_TXEN_bm;
-}
+    USART0.BAUD = 1389;                           // 9600 BAUD @ 3.33MHz
+    USART0.CTRLB = USART_RXEN_bm | USART_TXEN_bm; // enable TX/RX
+
+    USART0.CTRLA = USART_RXCIE_bm; // Enable receive complete interrupt
+
+    //stdout = &stdio;
+    //stdin = &stdio;
+}//uart_init

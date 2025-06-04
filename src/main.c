@@ -11,6 +11,11 @@
 #include <stdio.h>
 #include <avr/interrupt.h>
 
+
+#define MIN_PLAYBACK_DELAY 250
+#define MAX_PLAYBACK_DELAY 2000
+
+
 void state_machine(void);
 
 typedef enum {
@@ -32,7 +37,7 @@ uint16_t sequence[32];
 uint16_t elapsed_time;
 uint16_t sequence_length = 1;
 uint16_t sequence_index = 0;
-uint16_t playback_delay = 500;
+uint16_t playback_delay = MIN_PLAYBACK_DELAY;
 
 // Pushbutton states
 uint8_t pb_state_prev = 0xFF;  
@@ -49,6 +54,7 @@ int main(void)
     buttons_init();
     init_LSFR();
     timer_init();
+    adc_init();
     sei();
 
     state_machine();
@@ -67,6 +73,8 @@ void state_machine(void)
         // Find edges
         pb_falling_edge = (pb_state_prev ^ pb_state_curr) & pb_state_prev;
         pb_rising_edge  = (pb_state_prev ^ pb_state_curr) & pb_state_curr;
+
+        playback_delay = (((uint16_t) (MAX_PLAYBACK_DELAY - MIN_PLAYBACK_DELAY) * ADC0.RESULT) >> 8) + MIN_PLAYBACK_DELAY;
 
         switch (current_state)
         {
@@ -105,7 +113,7 @@ void state_machine(void)
                 break;
 
             case SIMON_PLAY_ON:
-                if (elapsed_time >= (playback_delay / 2)) {
+                if (elapsed_time >= (playback_delay >> 1)) {
                     stop_tone();
                     display_off();
                     current_state = SIMON_PLAY_OFF;
@@ -147,8 +155,7 @@ void state_machine(void)
                 break;
 
             case HANDLE_INPUT:
-
-                if ((pb_debounced_state) && (elapsed_time >= playback_delay / 2)) {
+                if ((pb_debounced_state) && (elapsed_time >= playback_delay >> 1)) {
                     stop_tone();
                     display_off();
                     current_state = EVALUATE_INPUT;
@@ -190,7 +197,7 @@ void state_machine(void)
                 break;
 
             case DISP_SCORE:
-                if (elapsed_time >= (playback_delay / 2)) {
+                if (elapsed_time >= (playback_delay >> 1)) {
                     display_off();
                     advance_LSFR(sequence_length);
                     sequence_index = 0;
