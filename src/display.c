@@ -3,28 +3,11 @@
 #include "initialisation.h"
 #include <avr/interrupt.h>
 
-volatile uint8_t digit_l = DISP_OFF;
-volatile uint8_t digit_r = DISP_OFF;
-volatile uint8_t dp_enable = 0;
+volatile uint8_t digit_l = DISP_OFF; //Initialises the Left display as off. 
+volatile uint8_t digit_r = DISP_OFF; //Initialises the Right display as off. 
+volatile uint8_t dp_enable = 0; //Variable used to control the Decimal Point on the 7 segment display
 
-void display_init(void) {
-    PORTMUX.SPIROUTEA = PORTMUX_SPI0_ALT1_gc;  // SPI pins on PC0-3
 
-    // SPI SCK and MOSI
-    PORTC.DIRSET = (PIN0_bm | PIN2_bm);   // SCK (PC0) and MOSI (PC2) output
-
-    // DISP_LATCH
-    PORTA.OUTSET = PIN1_bm;        // DISP_LATCH initial high
-    PORTA.DIRSET = PIN1_bm;        // set DISP_LATCH pin as output
-
-    PORTB.DIRSET = PIN5_bm;        //Set DISP_DP to output 
-    PORTB.OUTSET = PIN5_bm;        //Set DISP_DP to off. 
-
-    SPI0.CTRLA = SPI_MASTER_bm;    // Master, /4 prescaler, MSB first
-    SPI0.CTRLB = SPI_SSD_bm;       // Mode 0, client select disable, unbuffered
-    SPI0.INTCTRL = SPI_IE_bm;      // Interrupt enable
-    SPI0.CTRLA |= SPI_ENABLE_bm;   // Enable
-}
 
 // Set the display segments (this replaces set_display_segments)
 void set_display_segments(uint8_t segs_l, uint8_t segs_r) {

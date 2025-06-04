@@ -3,8 +3,18 @@
 
 #include <stdint.h>
 
+/**
+ * @brief Plays the required tone on the buzzer.
+ * 
+ * Sets the top values for each of the required frequencies
+ * Loads the top
+ * 
+ */
+void play_tone(uint8_t tone);
 
-void play_tone(uint8_t button);  // <-- Add this
+/**
+ * @brief 
+ */
 void stop_tone(void);
 
 void increase_octave(void);

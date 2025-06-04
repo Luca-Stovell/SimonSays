@@ -2,7 +2,24 @@
 
 #include "initialisation.h"
 
+void display_init(void) {
+    PORTMUX.SPIROUTEA = PORTMUX_SPI0_ALT1_gc;  // SPI pins on PC0-3
 
+    // SPI SCK and MOSI
+    PORTC.DIRSET = (PIN0_bm | PIN2_bm);   // SCK (PC0) and MOSI (PC2) output
+
+    // DISP_LATCH
+    PORTA.OUTSET = PIN1_bm;        // DISP_LATCH initial high
+    PORTA.DIRSET = PIN1_bm;        // set DISP_LATCH pin as output
+
+    PORTB.DIRSET = PIN5_bm;        //Set DISP_DP to output 
+    PORTB.OUTSET = PIN5_bm;        //Set DISP_DP to off. 
+
+    SPI0.CTRLA = SPI_MASTER_bm;    // Master, /4 prescaler, MSB first
+    SPI0.CTRLB = SPI_SSD_bm;       // Mode 0, client select disable, unbuffered
+    SPI0.INTCTRL = SPI_IE_bm;      // Interrupt enable
+    SPI0.CTRLA |= SPI_ENABLE_bm;   // Enable
+}
 
 void buzzer_init(void) {
 
@@ -40,9 +57,9 @@ void potentionmeter_init(void){
 
 void init_LSFR(void)
 {
-    lfsr_seed = 0x11079355; 
-    state = lfsr_seed;
-    saved_state = state;
+    lfsr_seed = 0x11079355; //The initial seed which the SimonSays game always starts from
+    state = lfsr_seed; //The current state of the LSFR.
+    saved_state = state; //Variable used to for replaying a sequence or advancing to the next state.
 }
 
 void timer_init(void) {
@@ -63,19 +80,19 @@ void timer_init(void) {
 
 
 void adc_init(){
-    ADC0.CTRLA = ADC_ENABLE_bm;
+    ADC0.CTRLA = ADC_ENABLE_bm; //Enables the ADC
 
-    ADC0.CTRLB = ADC_PRESC_DIV2_gc;
+    ADC0.CTRLB = ADC_PRESC_DIV2_gc; //Sets the prescaler which divides the clock.
 
-    ADC0.CTRLC = (4 << ADC_TIMEBASE_gp) | ADC_REFSEL_VDD_gc;
+    ADC0.CTRLC = (4 << ADC_TIMEBASE_gp) | ADC_REFSEL_VDD_gc; //Configure the time base to 4 clock cycles and use VDD as reference
 
-    ADC0.CTRLE = 64;
+    ADC0.CTRLE = 64; //Set Sampling Delay
 
-    ADC0.CTRLF = ADC_FREERUN_bm;
+    ADC0.CTRLF = ADC_FREERUN_bm; //Enable Free running mode. 
 
-    ADC0.MUXPOS = ADC_MUXPOS_AIN2_gc;
+    ADC0.MUXPOS = ADC_MUXPOS_AIN2_gc; //Select AIN2 as the input which is connnected to the potentiometer
 
-    ADC0.COMMAND = ADC_MODE_SINGLE_8BIT_gc | ADC_START_IMMEDIATE_gc;
+    ADC0.COMMAND = ADC_MODE_SINGLE_8BIT_gc | ADC_START_IMMEDIATE_gc; // Start single 8-bit conversion
 }
 void uart_init()
 {
