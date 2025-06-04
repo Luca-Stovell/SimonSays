@@ -150,15 +150,24 @@ void state_machine(void)
                     }
 
                     elapsed_time = 0;
+                    pb_released = 0;
                     current_state = HANDLE_INPUT;
                 }
                 break;
 
             case HANDLE_INPUT:
-                if ((pb_debounced_state) && (elapsed_time >= playback_delay >> 1)) {
-                    stop_tone();
-                    display_off();
-                    current_state = EVALUATE_INPUT;
+                if (!pb_released) {
+                    if (pb_rising_edge & (PIN4_bm | PIN5_bm | PIN6_bm | PIN7_bm)) {
+                        pb_released = 1;        
+                    }
+                }
+                else {                
+                    if (elapsed_time >= (playback_delay >> 1)) {
+                        stop_tone();
+                        display_off();
+                        elapsed_time = 0;
+                        current_state = EVALUATE_INPUT;
+                    }
                 }
                 break;
 

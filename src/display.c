@@ -17,7 +17,8 @@ void set_display_segments(uint8_t segs_l, uint8_t segs_r) {
 
 // Timer-driven multiplexing: swap digits
 void swap_display_digit(void) {
-    static int digit = 0;
+
+    static int digit = 0; //Variable used to rapidly cahgne between 0 and 1 for multiplexing
 
     if (digit) {
         // LEFT digit pass
@@ -26,9 +27,9 @@ void swap_display_digit(void) {
         else
             PORTB.OUTSET = PIN5_bm;  // DP OFF if not enabled
 
-        SPI0.DATA = digit_l | (1 << 7);
+        SPI0.DATA = digit_l | (1 << 7); //Bit shift to send to the left digit.
     } else {
-        // RIGHT digit pass — always DP OFF
+        // RIGHT digit pass
         PORTB.OUTSET = PIN5_bm;
         SPI0.DATA = digit_r;
     }

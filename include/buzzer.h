@@ -13,7 +13,9 @@
 void play_tone(uint8_t tone);
 
 /**
- * @brief 
+ * @brief Stops tone playback by disabling the buzzer or PWM output.
+ * 
+ * Silences any currently playing tone.
  */
 void stop_tone(void);
 

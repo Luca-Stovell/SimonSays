@@ -51,10 +51,12 @@ void timer_init(void);
 void potentionmeter_init(void);
 
 /**
- * @brief()
+ * @brief Initializes the UART interface for serial communication.
+ * 
+ * Configures baud rate, frame format, and enables UART transmit and receive.
  */
-
 void uart_init(void);
+
 
 /**
  * @brief Initializes the ADC peripheral for analog-to-digital conversion.
