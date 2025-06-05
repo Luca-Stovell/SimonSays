@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <stdio.h>
 
 #include "initialisation.h"
 
@@ -92,15 +93,3 @@ void adc_init(){
 
     ADC0.COMMAND = ADC_MODE_SINGLE_8BIT_gc | ADC_START_IMMEDIATE_gc; // Start single 8-bit conversion
 }
-void uart_init()
-{
-    PORTB.DIRSET = PIN2_bm; // enable PB2 as an output (UART TX)
-
-    USART0.BAUD = 1389;                           // 9600 BAUD @ 3.33MHz
-    USART0.CTRLB = USART_RXEN_bm | USART_TXEN_bm; // enable TX/RX
-
-    USART0.CTRLA = USART_RXCIE_bm; // Enable receive complete interrupt
-
-    //stdout = &stdio;
-    //stdin = &stdio;
-}//uart_init

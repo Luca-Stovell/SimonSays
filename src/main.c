@@ -15,8 +15,6 @@
 #define MIN_PLAYBACK_DELAY 250
 #define MAX_PLAYBACK_DELAY 2000
 
-#define RECIP_1P5  52429u 
-
 void state_machine(void);
 
 typedef enum {
@@ -47,6 +45,8 @@ uint8_t pb_state_curr = 0xFF;
 // Pushbutton flags
 uint8_t pb_falling_edge, pb_rising_edge, pb_released = 0;
 
+volatile uint8_t uart_requested_button = 0;
+
 int main(void)
 {
     cli();
@@ -56,6 +56,7 @@ int main(void)
     init_LSFR();
     timer_init();
     adc_init();
+    uart_init();
     sei();
 
     state_machine();
@@ -129,6 +130,39 @@ void state_machine(void)
                 break;
 
             case AWAIT_INPUT:
+                // 1) First, check if UART already “pressed” S1..S4:
+                if (uart_requested_button != 0)
+                {
+                    // Exactly the same logic as for a physical PB4..PB7 press:
+                    uint8_t b = uart_requested_button;
+                    uart_requested_button = 0;
+
+                    if (b == 1) {
+                        display_pattern_1();
+                        play_tone(0);
+                        current_button = 1;
+                    }
+                    else if (b == 2) {
+                        display_pattern_2();
+                        play_tone(1);
+                        current_button = 2;
+                    }
+                    else if (b == 3) {
+                        display_pattern_3();
+                        play_tone(2);
+                        current_button = 3;
+                    }
+                    else if (b == 4) {
+                        display_pattern_4();
+                        play_tone(3);
+                        current_button = 4;
+                    }
+                    // Now that we’ve “pressed” the button:
+                    elapsed_time = 0;
+                    pb_released  = 0;
+                    current_state = HANDLE_INPUT;
+                }
+
                 if (pb_falling_edge & (PIN4_bm | PIN5_bm | PIN6_bm | PIN7_bm)) {
                     if (pb_falling_edge & PIN4_bm) {
                         display_pattern_1();
@@ -158,19 +192,27 @@ void state_machine(void)
                 break;
 
             case HANDLE_INPUT:
-                if (!pb_released) {
-                    if (pb_rising_edge & (PIN4_bm | PIN5_bm | PIN6_bm | PIN7_bm)) {
-                        pb_released = 1;        
+                if (!pb_released)
+                {
+                    // If it really was a physical button press, wait for it to be released:
+                    if (pb_rising_edge & (PIN4_bm | PIN5_bm | PIN6_bm | PIN7_bm))
+                    {
+                        pb_released = 1;
                     }
                 }
-                else {                
-                    if (elapsed_time >= (playback_delay >> 1)) {
+
+                // Once pb_released == 1 (either from UART or PB release), wait half the delay:
+                if (pb_released)
+                {
+                    if (elapsed_time >= (playback_delay >> 1))
+                    {
                         stop_tone();
                         display_off();
                         current_state = EVALUATE_INPUT;
                     }
                 }
                 break;
+
 
             case EVALUATE_INPUT:
                 if (current_button == sequence[sequence_index]) {

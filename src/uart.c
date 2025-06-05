@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "main.h"
+#include "display.h"
 #include "uart.h"
 #include "buzzer.h"
 
@@ -34,98 +36,73 @@ static int stdio_getchar(FILE *stream)
     return uart_getc();
 }
 
+void uart_init()
+{
+    PORTB.DIRSET = PIN2_bm; // enable PB2 as an output (UART TX)
+
+    USART0.BAUD = 1389;                           // 9600 BAUD @ 3.33MHz
+    
+    USART0.CTRLB = USART_RXEN_bm | USART_TXEN_bm; // enable TX/RX
+
+    USART0.CTRLA = USART_RXCIE_bm; // Enable receive complete interrupt
+
+    stdout = &stdio;
+    stdin = &stdio;
+}//uart_init
+
 // -------------------------  SERIAL PARSER  -------------------------
-
-typedef enum
-{
-    AWAITING_COMMAND,
-    AWAITING_PAYLOAD
-} Serial_State;
-
-volatile uint8_t uart_play = 0;
-volatile uint8_t uart_stop = 0;
-
-static uint8_t hexchar_to_int(char c)
-{
-    if ('0' <= c && c <= '9')
-        return c - '0'; 
-    else if ('a' <= c && c <= 'f')
-        return 10 + c - 'a';
-    else
-        return 16; // Invalid
-}
 
 ISR(USART0_RXC_vect)
 {
-    static Serial_State SERIAL_STATE = AWAITING_COMMAND;
+    char rx_data = (char)USART0.RXDATAL;
 
-    // Payload parsing
-    static uint8_t chars_received = 0;
-    static uint16_t payload = 0;
-    static uint8_t payload_valid = 1;
+    // Echo back immediately
+    while (!(USART0.STATUS & USART_DREIF_bm)) { }
+    USART0.TXDATAL = (uint8_t)rx_data;
 
-    char rx_data = USART0.RXDATAL;
-    while (!(USART0.STATUS & USART_DREIF_bm));  // Wait for transmit ready
-    USART0.TXDATAL = rx_data;
-
-    switch (SERIAL_STATE)
-    {
-    case AWAITING_COMMAND:
-        if (rx_data == '1' || rx_data == '2')
-            update_tone(hexchar_to_int(rx_data) - 1);
-        else if (rx_data == 'p')
-        {
-            // Only if stopped
-            if (is_playing == 0)
-                uart_play = 1;
-        }
-        else if (rx_data == 's')
-        {
-            // Only if playing
-            if (is_playing == 1)
-                uart_stop = 1;
-        }
-        else if (rx_data == ',')
-            decrease_octave();
-        else if (rx_data == '.')
-            increase_octave();
-        else if (rx_data == 'd')
-        {
-            // Reset flags
-            payload_valid = 1;
-            chars_received = 0;
-            payload = 0;
-
-            // State transition
-            SERIAL_STATE = AWAITING_PAYLOAD;
-        }
-        break;
-    case AWAITING_PAYLOAD:
-    {
-        // Parse payload
-        uint8_t parsed_result = hexchar_to_int(rx_data);
-
-        // Valid
-        if (parsed_result != 16)
-            payload = (payload << 4) | parsed_result;
-        // Invalid
-        else
-            payload_valid = 0;
-
-        // Check if payload is complete
-        if (++chars_received == 4)
-        {
-            // Update playback delay if valid
-            if (payload_valid)
-                new_playback_delay = payload;
-
-            // State transition
-            SERIAL_STATE = AWAITING_COMMAND;
-        }
-        break;
+    // Handle each key in one‐byte fashion:
+    if (rx_data == '1' || rx_data == 'q') {
+        display_pattern_1();
+        play_tone(0);
+        current_button = 1;
+        elapsed_time   = 0;
+        pb_released    = 1;
+        current_state  = HANDLE_INPUT;
     }
-    default:
-        SERIAL_STATE = AWAITING_COMMAND;
-        break;
+    else if (rx_data == '2' || rx_data == 'w') {
+        display_pattern_2();
+        play_tone(1);
+        current_button = 2;
+        elapsed_time   = 0;
+        pb_released    = 1;
+        current_state  = HANDLE_INPUT;
+    }
+    else if (rx_data == '3' || rx_data == 'e') {
+        display_pattern_3();
+        play_tone(2);
+        current_button = 3;
+        elapsed_time   = 0;
+        pb_released    = 1;
+        current_state  = HANDLE_INPUT;
+    }
+    else if (rx_data == '4' || rx_data == 'r') {
+        display_pattern_4();
+        play_tone(3);
+        current_button = 4;
+        elapsed_time   = 0;
+        pb_released    = 1;
+        current_state  = HANDLE_INPUT;
+    }
+    else if (rx_data == ',' || rx_data == 'k') {
+        // increase_octave();
+    }
+    else if (rx_data == '.' || rx_data == 'l') {
+        // decrease_octave();
+    }
+    else if (rx_data == '0' || rx_data == 'p') {
+        // perform reset logic in main
+    }
+    else if (rx_data == '9' || rx_data == 'o') {
+        // perform seed‐load logic in main
     }
 }
