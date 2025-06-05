@@ -33,8 +33,8 @@ void decrease_octave(void)
 
 void play_tone(uint8_t tone)
 {
-    // Frequencies: 341, 287, 455, 176
-    static const uint16_t per_values[4] = {9775, 11616, 7324, 18942};
+    // Frequencies: 341, 287, 455, 170
+    static const uint16_t per_values[4] = {9775, 11616, 7324, 19607};
 
     TCA0.SINGLE.PERBUF = per_values[tone];
     TCA0.SINGLE.CMP0BUF = per_values[tone] >> 1;

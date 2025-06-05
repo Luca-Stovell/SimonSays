@@ -15,6 +15,7 @@
 #define MIN_PLAYBACK_DELAY 250
 #define MAX_PLAYBACK_DELAY 2000
 
+#define RECIP_1P5  52429u 
 
 void state_machine(void);
 
@@ -79,6 +80,7 @@ void state_machine(void)
         switch (current_state)
         {
             case SIMON_GENERATE:
+            
                 if (sequence_index == sequence_length) {
                     sequence_index = 0;
                     reset_LSFR();
@@ -165,7 +167,6 @@ void state_machine(void)
                     if (elapsed_time >= (playback_delay >> 1)) {
                         stop_tone();
                         display_off();
-                        elapsed_time = 0;
                         current_state = EVALUATE_INPUT;
                     }
                 }
@@ -187,7 +188,7 @@ void state_machine(void)
                     display_fail_pattern();
                     elapsed_time = 0;
                     current_state = FAIL;
-                }
+                }  
                 break;
 
             case FAIL:
@@ -199,11 +200,18 @@ void state_machine(void)
                 break;
 
             case SUCCESS:
-                if (elapsed_time >= playback_delay) {
+            {
+                // Compute threshold = ⌊playback_delay / 1.01⌋ using 16.16 fixed‐point:
+                uint32_t tmp = (uint32_t)playback_delay * 52429u;  
+                uint16_t threshold = tmp >> 16;
+
+                // Now compare elapsed_time against that threshold:
+                if (elapsed_time >= threshold) {
                     display_off();
                     current_state = SIMON_GENERATE;
                 }
-                break;
+            }
+            break;
 
             case DISP_SCORE:
                 if (elapsed_time >= (playback_delay >> 1)) {

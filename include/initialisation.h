@@ -49,9 +49,9 @@ void timer_init(void);
  */
 
 void potentionmeter_init(void);
-
+                                                
 /**
- * @brief Initializes the UART interface for serial communication.
+ * @brief Initialise UART as stdin/stdout
  * 
  * Configures baud rate, frame format, and enables UART transmit and receive.
  */

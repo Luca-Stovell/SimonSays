@@ -88,8 +88,6 @@ void adc_init(){
 
     ADC0.CTRLE = 64; //Set Sampling Delay
 
-    ADC0.CTRLF = ADC_FREERUN_bm; //Enable Free running mode. 
-
     ADC0.MUXPOS = ADC_MUXPOS_AIN2_gc; //Select AIN2 as the input which is connnected to the potentiometer
 
     ADC0.COMMAND = ADC_MODE_SINGLE_8BIT_gc | ADC_START_IMMEDIATE_gc; // Start single 8-bit conversion
