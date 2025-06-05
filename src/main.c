@@ -45,7 +45,24 @@ uint8_t pb_state_curr = 0xFF;
 // Pushbutton flags
 uint8_t pb_falling_edge, pb_rising_edge, pb_released = 0;
 
+volatile uint8_t uart_play = 0;
+volatile uint8_t uart_stop = 0;
 volatile uint8_t uart_requested_button = 0;
+
+static uint8_t read_pot_once(void)
+{
+    // Start a single 8-bit conversion
+    ADC0.COMMAND = ADC_MODE_SINGLE_8BIT_gc | ADC_START_IMMEDIATE_gc;
+
+    // Wait until conversion complete
+    while (!(ADC0.INTFLAGS & ADC_RESRDY_bm)) {
+        ;
+    }
+
+    uint8_t val = ADC0.RESULT;
+    ADC0.INTFLAGS = ADC_RESRDY_bm;  // Clear flag
+    return val;
+}
 
 int main(void)
 {
@@ -76,12 +93,13 @@ void state_machine(void)
         pb_falling_edge = (pb_state_prev ^ pb_state_curr) & pb_state_prev;
         pb_rising_edge  = (pb_state_prev ^ pb_state_curr) & pb_state_curr;
 
-        playback_delay = (((uint16_t) (MAX_PLAYBACK_DELAY - MIN_PLAYBACK_DELAY) * ADC0.RESULT) >> 8) + MIN_PLAYBACK_DELAY;
+
 
         switch (current_state)
         {
-            case SIMON_GENERATE:
-            
+            case SIMON_GENERATE:{
+                uint8_t pot_value = read_pot_once();
+                playback_delay = (uint16_t)MIN_PLAYBACK_DELAY + (((uint16_t)(MAX_PLAYBACK_DELAY - MIN_PLAYBACK_DELAY) * pot_value) / 255);
                 if (sequence_index == sequence_length) {
                     sequence_index = 0;
                     reset_LSFR();
@@ -113,6 +131,7 @@ void state_machine(void)
                     elapsed_time = 0;
                     current_state = SIMON_PLAY_ON;
                 }
+            }
                 break;
 
             case SIMON_PLAY_ON:
@@ -194,14 +213,11 @@ void state_machine(void)
             case HANDLE_INPUT:
                 if (!pb_released)
                 {
-                    // If it really was a physical button press, wait for it to be released:
                     if (pb_rising_edge & (PIN4_bm | PIN5_bm | PIN6_bm | PIN7_bm))
                     {
                         pb_released = 1;
                     }
                 }
-
-                // Once pb_released == 1 (either from UART or PB release), wait half the delay:
                 if (pb_released)
                 {
                     if (elapsed_time >= (playback_delay >> 1))
@@ -241,19 +257,13 @@ void state_machine(void)
                 }
                 break;
 
-            case SUCCESS:
-            {
-                // Compute threshold = ⌊playback_delay / 1.01⌋ using 16.16 fixed‐point:
-                uint32_t tmp = (uint32_t)playback_delay * 52429u;  
-                uint16_t threshold = tmp >> 16;
 
-                // Now compare elapsed_time against that threshold:
-                if (elapsed_time >= threshold) {
+            case SUCCESS:
+                if (elapsed_time >= playback_delay) {
                     display_off();
                     current_state = SIMON_GENERATE;
                 }
-            }
-            break;
+                break;
 
             case DISP_SCORE:
                 if (elapsed_time >= (playback_delay >> 1)) {

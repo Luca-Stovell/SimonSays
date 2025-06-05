@@ -94,10 +94,10 @@ ISR(USART0_RXC_vect)
         current_state  = HANDLE_INPUT;
     }
     else if (rx_data == ',' || rx_data == 'k') {
-        // increase_octave();
+        increase_octave();
     }
     else if (rx_data == '.' || rx_data == 'l') {
-        // decrease_octave();
+        decrease_octave();
     }
     else if (rx_data == '0' || rx_data == 'p') {
         // perform reset logic in main

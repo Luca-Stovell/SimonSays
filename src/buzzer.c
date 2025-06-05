@@ -3,8 +3,8 @@
 #include "buzzer.h"
 
 volatile uint8_t is_playing = 0;
-static int8_t selected_tone = 0;
-static int8_t octave = 0;
+volatile uint8_t selected_tone = 0;
+volatile uint8_t octave = 0;
 
 #define MIN_OCTAVE -3
 #define MAX_OCTAVE 3
@@ -29,6 +29,21 @@ void decrease_octave(void)
         if (is_playing)
             play_tone(selected_tone);
     }
+}
+
+void update_tone(uint8_t new_tone)
+{
+    // Update the tone if already active
+    if (is_playing)
+        play_tone(new_tone);
+    else
+        // otherwise, select a new tone for the next time a tone is played
+        selected_tone = new_tone;
+}
+
+void play_selected_tone(void)
+{
+    play_tone(selected_tone);
 }
 
 void play_tone(uint8_t tone)

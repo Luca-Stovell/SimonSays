@@ -24,5 +24,7 @@ extern uint8_t   pb_released;       // has the physical PB been released?
 extern uint8_t   pb_falling_edge;   // set each ms by button debounce
 extern uint8_t   pb_rising_edge;    // set each ms by button debounce
 extern volatile uint8_t uart_requested_button;
+extern volatile uint8_t uart_play;
+extern volatile uint8_t uart_stop;
 
 #endif

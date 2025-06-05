@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+extern volatile uint8_t is_playing;  
+extern volatile uint8_t selected_tone;  
+extern volatile uint8_t octave;  
+
 /**
  * @brief Plays the required tone on the buzzer.
  * 
@@ -21,5 +25,8 @@ void stop_tone(void);
 
 void increase_octave(void);
 void decrease_octave(void);
+void update_tone(uint8_t new_tone);
+void play_selected_tone(void);
 
 #endif
+
