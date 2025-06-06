@@ -5,8 +5,7 @@
 #include "pushbutton.h"
 #include "display.h"
 #include "timer.h"
-
-volatile uint16_t elapsed_time = 0;
+#include "main.h"
 
 // periodic interrupt every 1ms
 ISR(TCB0_INT_vect) { 

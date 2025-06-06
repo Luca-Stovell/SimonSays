@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "initialisation.h"
+#include "buzzer.h"
 
 void display_init(void) {
     PORTMUX.SPIROUTEA = PORTMUX_SPI0_ALT1_gc;  // SPI pins on PC0-3
@@ -39,7 +40,8 @@ void buzzer_init(void) {
     TCA0.SINGLE.PER = 1;      
     TCA0.SINGLE.CMP0 = 0;    
 
-    TCA0.SINGLE.CTRLA |= TCA_SINGLE_ENABLE_bm;      // Enable TCA0 
+    TCA0.SINGLE.CTRLA |= TCA_SINGLE_ENABLE_bm;      // Enable TCA0
+    recompute_all_periods(); //Initialises all the tones with the base Top values.
 }//buzzer_init
 
 void buttons_init(void)
@@ -81,17 +83,16 @@ void timer_init(void) {
 
 
 void adc_init(){
-    ADC0.CTRLA = ADC_ENABLE_bm; //Enables the ADC
-
+    
     ADC0.CTRLB = ADC_PRESC_DIV2_gc; //Sets the prescaler which divides the clock.
 
     ADC0.CTRLC = (4 << ADC_TIMEBASE_gp) | ADC_REFSEL_VDD_gc; //Configure the time base to 4 clock cycles and use VDD as reference
 
     ADC0.CTRLE = 64; //Set Sampling Delay
 
-    ADC0.CTRLF = 0;
-
     ADC0.MUXPOS = ADC_MUXPOS_AIN2_gc; //Select AIN2 as the input which is connnected to the potentiometer
 
     ADC0.COMMAND = ADC_MODE_SINGLE_8BIT_gc | ADC_START_IMMEDIATE_gc; // Start single 8-bit conversion
+
+    ADC0.CTRLA = ADC_ENABLE_bm; //Enables the ADC
 }

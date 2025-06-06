@@ -7,6 +7,9 @@
 #include "display.h"
 #include "uart.h"
 #include "buzzer.h"
+#include "limits.h"
+#include "initialisation.h"
+
 
 static int stdio_putchar(char c, FILE *stream);
 static int stdio_getchar(FILE *stream);
@@ -100,7 +103,15 @@ ISR(USART0_RXC_vect)
         decrease_octave();
     }
     else if (rx_data == '0' || rx_data == 'p') {
-        // perform reset logic in main
+        stop_tone();
+        display_off();
+        init_LSFR();
+        sequence_index = 0;
+        sequence_length = 1;
+        elapsed_time = 0;
+        octave = 0;
+        recompute_all_periods();
+        current_state = SIMON_GENERATE;
     }
     else if (rx_data == '9' || rx_data == 'o') {
         // perform seed‐load logic in main

@@ -23,6 +23,8 @@ void play_tone(uint8_t tone);
  */
 void stop_tone(void);
 
+void recompute_all_periods(void);
+
 void increase_octave(void);
 void decrease_octave(void);
 void update_tone(uint8_t new_tone);
